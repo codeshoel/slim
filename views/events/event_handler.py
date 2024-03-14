@@ -5,12 +5,13 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtWidgets import QFileDialog
 
 
-class EventHandler:
+class EventHandler():
     
     def open_directory(self):
-        directory_name = QFileDialog.getExistingDirectory(self, "Select Directory", "", QFileDialog.ShowDirsOnly)
-        if directory_name:
-            print(directory_name)
+        options = QFileDialog.ShowDirsOnly
+        file_name = QFileDialog.getExistingDirectory(None, 'Select a folder:', '', options)
+        if file_name:
+            print("Selected file:", file_name)
 
 
     def open_files(self):

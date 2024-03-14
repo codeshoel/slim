@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import *
 from views.audio_rename_ui.ui import AudioRenameUI
 
 
-
 class Window(QMainWindow):
     def __init__(self):
         super().__init__()
