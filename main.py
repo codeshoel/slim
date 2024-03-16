@@ -1,53 +1,43 @@
 import os, sys
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from views.audio_rename_ui.ui import AudioRenameUI
+from PyQt5.QtWidgets import QMainWindow, QApplication
+from views.events.event_handler import FileHandlerEvent
+from views.audio_rename_ui.generated_ui import Ui_SlimAudioFileRefactor
 
-
-
-class Window(QMainWindow):
-    def __init__(self):
+class AppWindow(QMainWindow):
+    def __init__(self) -> None:
         super().__init__()
-        self.setWindowTitle("Simple App")
-        self.setGeometry(50, 50, 500, 300)
-        # AudioRenameUI.file_inputs(self)
-
-        self.central_widge = QWidget(self)
-        self.setCentralWidget(self.central_widge);
-
-        self.layout = QVBoxLayout(self.central_widge)
-
-        # Tab widgets
-        self.tabs = QTabWidget(self)
-
-        # Add tabs
-        self.tab1 = QWidget()
-        self.tab2 = QWidget()
-
-        # Add widgets to each of the tabs
-
-        # tab1
-        self.tab1.layout = QVBoxLayout()
-        
-        self.tab1.layout.addWidget(AudioRenameUI.file_inputs(self))
-        self.tab1.setLayout(self.tab1.layout)
-
-        # tab2
-        self.tab2.layout = QVBoxLayout()
-        self.tab2.layout.addWidget(QPushButton('Button 2 on Tab 2'))
-        self.tab2.setLayout(self.tab2.layout)
-
-        # Add tabs to the tab widget
-        self.tabs.addTab(self.tab1, 'Rename Audio Files')
-        self.tabs.addTab(self.tab2, 'Tab 2')
-
-        # Add the tab widget to the main layout
-        self.layout.addWidget(self.tabs)
+        self.setWindowTitle('Slim Audio File Refactor')
+        self.mainAppUI = Ui_SlimAudioFileRefactor()
+        self.mainAppUI.setupUi(self)
+        self.select_dir_event()
+        self.select_csv_dir_event()
+    
+    '''Selecting the button from designer and 
+       connecting it to the event handler for audio directory'''
+    def select_dir_event(self):
+        self.event_handler = FileHandlerEvent()
+        self.select_dir_btn = self.mainAppUI.pushButton
+        self.select_dir_btn.clicked.connect(lambda: self.event_handler.open_audio_directory(self.mainAppUI))
+    
+    
+    '''Selecting the button from designer and 
+      connecting it to the event handler for csv directory'''
+    def select_csv_dir_event(self):
+        self.event_handler = FileHandlerEvent()
+        self.select_csv_dir_btn = self.mainAppUI.pushButton_2
+        self.select_csv_dir_btn.clicked.connect(lambda: self.event_handler.open_csv_directory(self.mainAppUI))
+   
 
 
-if __name__ == "__main__":
+
+
+
+
+if __name__ == '__main__':
     app = QApplication(sys.argv);
-    window = Window()
+    window = AppWindow()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
+
+
+
