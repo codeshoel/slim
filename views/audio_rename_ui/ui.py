@@ -22,7 +22,6 @@ class AudioRenameUI(QWidget):
         # Open Director
         self.event_handler = EventHandler()
         self.audio_files_dir_selector.clicked.connect(self.event_handler.open_directory)
-        
 
 
 
