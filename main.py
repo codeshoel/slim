@@ -8,6 +8,15 @@ import pandas as pd
 from datetime import datetime
 import random
 
+
+class CustomMessageBox(QMessageBox):
+    def event(self, e):
+        if e.type() == QEvent.Close:
+            if self.clickedButton() == self.defaultButton():
+                self.show_matched_files_slot()
+        return super().event(e)
+
+
 class WorkerThread(QThread):
     task_finished = pyqtSignal(dict)
     task_progress = pyqtSignal(int)
@@ -233,35 +242,68 @@ class Window(QMainWindow):
         self.worker_thread.start()
 
     def show_alert(self, dict_msg):
+        print(dict_msg)
+
         # Hide the progress bar and cancel button
         self.progress_bar.hide()
         self.cancelButton.hide()
 
-        self.alertMessage = QMessageBox()
-        self.alertMessage.setFixedSize(400, 600)
-        self.alertMessage.setWindowTitle("Renaming Summary")
-        self.alertMessage.setIcon(QMessageBox.Information)
-
-        layout = QVBoxLayout()
-
-
+        # Create CustomMessageBox for the summary message
+        self.alertMessage = CustomMessageBox()
         message_label = QLabel(f"{dict_msg['message']}")
-        layout.addWidget(message_label)
+        self.alertMessage.setWindowTitle("Task Summary")
+        self.alertMessage.setIcon(QMessageBox.Information)
+        self.alertMessage.setStandardButtons(QMessageBox.Ok)  # Set default button
+        self.alertMessage.setDefaultButton(QMessageBox.Ok)  # Set default button
+        self.alertMessage.setInformativeText("Click OK to view matched files.")  # Add informative text
+
+        # Create layout for the QMessageBox
+        alert_layout = QVBoxLayout()
 
         if dict_msg['matched_files']:
-            table = QTableWidget()
-            table.setColumnCount(2)
-            table.setHorizontalHeaderLabels(["Phone Number", "ID"])
-            table.setRowCount(len(dict_msg['matched_files']))
+            table_button_layout = QHBoxLayout()
 
-            for i, (phone_number, _id) in enumerate(dict_msg['matched_files']):
-                table.setItem(i, 0, QTableWidgetItem(phone_number))
-                table.setItem(i, 1, QTableWidgetItem(str(_id)))
+            # Create a button to show matched files in a table
+            show_table_button = QPushButton("Show Matched Files")
+            show_table_button.clicked.connect(self.show_matched_files_slot)
+            table_button_layout.addWidget(show_table_button)
 
-            layout.addWidget(table)
+            alert_layout.addLayout(table_button_layout)
 
-        self.alertMessage.setLayout(layout)
+            alert_layout.setSizeConstraint(QLayout.SetMinimumSize)
+
+        self.alertMessage.setLayout(alert_layout)
+        self.alertMessage.resize(600, 400)
+
         self.alertMessage.exec_()
+
+    def show_matched_files_slot(self):
+        # Create QWidget for displaying the matched files in a table
+        matched_files_widget = QWidget()
+        matched_files_widget.setWindowTitle("Matched Files")
+        matched_files_widget.resize(600, 400)
+
+        # Create layout for the QWidget
+        matched_files_layout = QVBoxLayout(matched_files_widget)
+
+        # Create QTableWidget to display matched files
+        table = QTableWidget()
+        table.setColumnCount(2)
+        table.setHorizontalHeaderLabels(["Phone Number", "ID"])
+        table.setRowCount(len(self.matched_files))
+
+        for i, (phone_number, _id) in enumerate(self.matched_files):
+            table.setItem(i, 0, QTableWidgetItem(phone_number))
+            table.setItem(i, 1, QTableWidgetItem(str(_id)))
+
+        matched_files_layout.addWidget(table)
+
+        # Show the QWidget containing the matched files table
+        matched_files_widget.show()
+
+
+
+
 
     def cancel_task(self):
         if hasattr(self, 'worker_thread') and self.worker_thread.isRunning():
