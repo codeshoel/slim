@@ -9,6 +9,9 @@ from datetime import datetime
 import random
 
 
+basedir = os.path.dirname(__file__)
+
+
 class CustomMessageBox(QMessageBox):
     def event(self, e):
         if e.type() == QEvent.Close:
@@ -96,15 +99,22 @@ class Window(QMainWindow):
         super().__init__()
 
         try:
-            with open('static/style.css', 'r') as f:
+            with open(os.path.join(basedir, 'static/css/style.css'), 'r') as f:
                 # initializing stylesheet
                 self.setStyleSheet(f.read())
         except FileNotFoundError:
             print("Stylesheet file 'style.css' not found in 'static' directory.")
 
-        self.setWindowTitle("Slim tool")
-        self.setGeometry(50, 50, 300, 300)
+        # Constants
+        self.warningAlert = "Warning Alert"
+        self.successAlert = "Success Alert"
+
+
+        self.setWindowTitle("Slim tools")
+        self.setWindowIcon(QIcon(os.path.join(basedir, 'static/images/icon.png')))
+        self.setGeometry(0, 0, 300, 300)
         self.setObjectName("mainWindow")
+        self.center()
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -125,7 +135,7 @@ class Window(QMainWindow):
         # tab2
         self.tab2 = QWidget()
         self.tab2_layout = QVBoxLayout()
-        self.tab2_layout.addWidget(QPushButton('Button 2 on Tab 2'))
+        self.tab2_layout.addWidget(self.second_tab())
         self.tab2.setLayout(self.tab2_layout)
 
         # Add tabs to the tab widget
@@ -194,6 +204,7 @@ class Window(QMainWindow):
         # Event handlers
         self.audio_files_dir_selector_bnt.clicked.connect(self.open_directory)
         self.csv_files_dir_selector_btn.clicked.connect(self.open_csv_file)
+        # self.renameButton.clicked.connect(self.popup_widget)
         self.renameButton.clicked.connect(self.rename_audio_files)
         self.cancelButton.clicked.connect(self.cancel_task)
 
@@ -229,7 +240,12 @@ class Window(QMainWindow):
         prefix = self.preFix.text()
 
         if not directory or not file_path:
+            self.requirementAlert = QMessageBox()
+            self.requirementLabel = "Please select required directory and file to proceed"
+            self.requirementAlert.setIcon(QMessageBox.Warning)  # Corrected line
+            self.requirementAlert.about(None, self.warningAlert, self.requirementLabel)
             return
+
 
         # Show the progress bar and cancel button
         self.progress_bar.show()
@@ -242,21 +258,19 @@ class Window(QMainWindow):
         self.worker_thread.start()
 
     def show_alert(self, dict_msg):
-        print(dict_msg)
 
         # Hide the progress bar and cancel button
         self.progress_bar.hide()
         self.cancelButton.hide()
 
         # Create CustomMessageBox for the summary message
+        show_table_button = QPushButton("Show Matched Files")
         self.alertMessage = CustomMessageBox()
-        message_label = QLabel(f"{dict_msg['message']}")
+        self.alertMessage.setGeometry(0, 0, 400, 400)
         self.alertMessage.setWindowTitle("Task Summary")
         self.alertMessage.setIcon(QMessageBox.Information)
-        self.alertMessage.setStandardButtons(QMessageBox.Ok)  # Set default button
-        self.alertMessage.setDefaultButton(QMessageBox.Ok)  # Set default button
-        self.alertMessage.setInformativeText("Click OK to view matched files.")  # Add informative text
-
+        self.alertMessage.setDefaultButton(show_table_button)
+        self.alertMessage.setInformativeText("Click OK to view matched files.")
         # Create layout for the QMessageBox
         alert_layout = QVBoxLayout()
 
@@ -264,7 +278,6 @@ class Window(QMainWindow):
             table_button_layout = QHBoxLayout()
 
             # Create a button to show matched files in a table
-            show_table_button = QPushButton("Show Matched Files")
             show_table_button.clicked.connect(self.show_matched_files_slot)
             table_button_layout.addWidget(show_table_button)
 
@@ -311,6 +324,32 @@ class Window(QMainWindow):
 
     def update_progress(self, progress):
         self.progress_bar.setValue(progress)
+
+
+    def second_tab(self):
+        widget = QWidget(self)
+        layout = QVBoxLayout(widget)
+
+        self.label = QLabel()
+        self.label.setGeometry(0, 0, 0, 0)
+        self.label.setText("Coming Soon..!")
+        self.label.setObjectName("coming_soon")
+
+        layout.addWidget(self.label)
+
+        return widget
+    # def popup_widget(self):
+    #     layout = QVBoxLayout()
+    #     layout.addWidget(QPushButton("Hello Gabriel"))
+    #     layout.exec_()
+
+    def center(self):
+        # Get the screen resolution and set the position of the application
+        screen = QDesktopWidget().screenGeometry()
+        size = self.geometry()
+        x = (screen.width() - size.width()) / 2
+        y = (screen.height() - size.height()) / 2
+        self.move(int(x), int(y))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
