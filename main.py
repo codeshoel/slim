@@ -13,7 +13,7 @@ class Window(QMainWindow):
         # AudioRenameUI.file_inputs(self)
 
         self.central_widge = QWidget(self)
-        self.setCentralWidget(self.central_widge);
+        self.setCentralWidget(self.central_widge)
 
         self.layout = QVBoxLayout(self.central_widge)
 
@@ -46,7 +46,7 @@ class Window(QMainWindow):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv);
+    app = QApplication(sys.argv)
     window = Window()
     window.show()
     sys.exit(app.exec())
