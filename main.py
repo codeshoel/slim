@@ -48,7 +48,7 @@ class WorkerThread(QThread):
                     if filename.endswith(".mp3"):
                         _path = os.path.join(self.directory, filename)
                         _file_name = os.path.splitext(filename)[0]
-                        _date = datetime.strptime(_file_name.split('T')[0], '%Y%m%d').strftime('%d%m%y')
+                        _date = datetime.strptime(_file_name.split('T')[0], '%Y%m%d').strftime('%d%m%Y')
                         _phone = str(_file_name.split('_')[2])
                         if _phone.startswith('234'):
                             _phone = '0' + _phone[3:]
